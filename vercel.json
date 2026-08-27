@@ -8,15 +8,5 @@
       {"key":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=()"},
       {"key":"X-Frame-Options","value":"DENY"}
     ]}
-  ],
-  "rewrites": [
-    {"source":"/telecom","destination":"/index.html"},
-    {"source":"/energia","destination":"/index.html"},
-    {"source":"/empresas","destination":"/index.html"},
-    {"source":"/zona-fibaro","destination":"/index.html"},
-    {"source":"/c/:path*","destination":"/index.html"},
-    {"source":"/privacidad","destination":"/privacidad.html"},
-    {"source":"/aviso-legal","destination":"/aviso-legal.html"},
-    {"source":"/admin","destination":"/admin/index.html"}
   ]
 }
