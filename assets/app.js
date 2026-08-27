@@ -20,6 +20,10 @@
     $('#route-subtitle').textContent = routeCopy[path].subtitle;
     $('#route-primary').textContent = routeCopy[path].primary;
     document.title = `${routeCopy[path].title} | FÍBARO Telecom`;
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = `https://${C.domain || 'fibaroteleco.com'}/${path}`;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.content = routeCopy[path].subtitle;
   }
 
   const qs = new URLSearchParams(location.search);
