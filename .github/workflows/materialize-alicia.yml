@@ -1,0 +1,38 @@
+name: Materialize Alicia image
+on:
+  push:
+    branches: [chatgpt/alicia-webp-asset]
+permissions:
+  contents: write
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode existing payload and point website to stable image
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import ast,re,base64
+          p=Path('assets/alicia-data-1.js')
+          s=p.read_text()
+          m=re.search(r"window\.__FIBARO_ASSETS\.alicia\[0\]=\[\n(.*?)\n\]\.join\(''\);",s,re.S)
+          if not m: raise SystemExit('payload array not found')
+          vals=[]
+          for line in m.group(1).splitlines():
+              line=line.strip().rstrip(',')
+              if line: vals.append(ast.literal_eval(line))
+          Path('assets/alicia.webp').write_bytes(base64.b64decode(''.join(vals)))
+          html=Path('index.html').read_text()
+          html=html.replace('<img id="alicia-photo" class="alicia-photo" alt="Alicia, responsable comercial de FÍBARO">','<img id="alicia-photo" class="alicia-photo" src="https://raw.githubusercontent.com/internobras/TIENDAFIBARO/main/assets/alicia.webp" alt="Alicia, responsable comercial de FÍBARO">')
+          html=html.replace('<script src="/assets/alicia-data-1.js"></script>','')
+          Path('index.html').write_text(html)
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/alicia.webp index.html
+          git commit -m "chore: serve Alicia as WebP asset" || exit 0
+          git push
