@@ -5,20 +5,30 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <meta name="description" content="FÍBARO revisa fibra, móvil y luz contigo. Alicia es tu persona de contacto y en Zona FÍBARO contamos además con equipo técnico propio para muchas instalaciones.">
-  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FÍBARO | Tus servicios, bajo control">
+  <meta property="og:description" content="Fibra, móvil, luz y empresas con atención personal. Alicia revisa tu caso y te explica solo las opciones que tengan sentido.">
+  <meta property="og:url" content="https://www.fibaroteleco.com/">
+  <meta property="og:site_name" content="FÍBARO Telecomunicaciones">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="FÍBARO | Tus servicios, bajo control">
+  <meta name="twitter:description" content="Fibra, móvil, luz y empresas con atención personal de Alicia.">
   <link rel="canonical" href="https://www.fibaroteleco.com/">
-  <link rel="icon" href="/assets/favicon.png" type="image/png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fff'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%231769e8' stroke-width='8' stroke-dasharray='92 20' transform='rotate(-38 32 32)'/%3E%3C/svg%3E">
   <title>FÍBARO | Fibra, móvil y luz con atención personal</title>
-  <link rel="stylesheet" href="/assets/styles.css?v=3">
+  <link rel="stylesheet" href="/assets/styles.css?v=4">
+  <link rel="stylesheet" href="/assets/brand.css?v=4">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"LocalBusiness","name":"FÍBARO Telecomunicaciones","url":"https://www.fibaroteleco.com/","telephone":"+34633671657","address":{"@type":"PostalAddress","streetAddress":"C/ Infanta Beatriz 13","postalCode":"11540","addressLocality":"Sanlúcar de Barrameda","addressRegion":"Cádiz","addressCountry":"ES"},"areaServed":"ES"}
+  {"@context":"https://schema.org","@type":"LocalBusiness","name":"FÍBARO Telecomunicaciones","url":"https://www.fibaroteleco.com/","telephone":"+34633671657","address":{"@type":"PostalAddress","streetAddress":"C/ Infanta Beatriz 13","postalCode":"11540","addressLocality":"Sanlúcar de Barrameda","addressRegion":"Cádiz","addressCountry":"ES"},"areaServed":{"@type":"Country","name":"España"},"sameAs":["https://instagram.com/fibaroteleco","https://www.tiktok.com/@fibaroteleco"]}
   </script>
 </head>
 <body>
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="/" aria-label="FÍBARO Telecomunicaciones">
-      <img src="/assets/logo-fibaro.webp" alt="FÍBARO Telecomunicaciones" width="190" height="67">
+      <img data-fibaro-logo alt="FÍBARO Telecomunicaciones" width="190" height="67">
     </a>
     <nav class="desktop-nav" aria-label="Principal">
       <a href="/telecom">Fibra y móvil</a>
@@ -28,7 +38,7 @@
     </nav>
     <div class="header-actions">
       <a class="phone-link js-call" href="tel:+34633671657">633 671 657</a>
-      <button class="btn btn-primary header-cta" data-open-funnel>Que Alicia lo revise</button>
+      <button class="btn btn-primary header-cta" type="button" data-open-funnel>Que Alicia lo revise</button>
     </div>
   </div>
 </header>
@@ -41,7 +51,7 @@
         <h1 id="route-title">Tus servicios, <span>bajo control.</span></h1>
         <p class="hero-lead" id="route-subtitle">Cuéntanos qué tienes y qué quieres mejorar. Alicia revisa tu caso y te explica solo las opciones que realmente tengan sentido para ti.</p>
         <div class="hero-actions">
-          <button class="btn btn-primary btn-lg" id="route-primary" data-open-funnel>Quiero que Alicia lo revise</button>
+          <button class="btn btn-primary btn-lg" type="button" id="route-primary" data-open-funnel>Quiero que Alicia lo revise</button>
           <a class="btn btn-secondary btn-lg js-wa-direct" href="#">Hablar por WhatsApp</a>
         </div>
         <div class="trust-row" aria-label="Compromisos FÍBARO">
@@ -51,7 +61,7 @@
 
       <aside class="alicia-profile" aria-label="Alicia, atención FÍBARO">
         <div class="photo-frame">
-          <img id="alicia-photo" src="/assets/alicia.webp?v=3" alt="Alicia, atención FÍBARO" width="534" height="586" loading="eager" decoding="async">
+          <img data-alicia-photo alt="Alicia, atención FÍBARO" width="534" height="586" loading="eager" decoding="async" fetchpriority="high">
           <div class="online-pill"><i></i> Alicia revisa personalmente las solicitudes</div>
         </div>
         <div class="profile-caption">
@@ -78,17 +88,17 @@
         <p>Nosotros filtramos el catálogo interno. Tú solo tienes que contarnos el problema.</p>
       </div>
       <div class="service-grid">
-        <button class="service-card" data-service="telecom">
-          <span class="service-icon">⌁</span><h3>Fibra y móvil</h3><p>Internet, líneas móviles, TV o segunda residencia.</p><b>Revisar telecom →</b>
+        <button class="service-card" type="button" data-service="telecom">
+          <span class="service-icon" aria-hidden="true">⌁</span><h3>Fibra y móvil</h3><p>Internet, líneas móviles, TV o segunda residencia.</p><b>Revisar telecom →</b>
         </button>
-        <button class="service-card" data-service="luz">
-          <span class="service-icon">ϟ</span><h3>Luz</h3><p>Revisamos tu situación o tu factura sin pedirte que la descifres.</p><b>Revisar luz →</b>
+        <button class="service-card" type="button" data-service="luz">
+          <span class="service-icon" aria-hidden="true">ϟ</span><h3>Luz</h3><p>Revisamos tu situación o tu factura sin pedirte que la descifres.</p><b>Revisar luz →</b>
         </button>
-        <button class="service-card" data-service="empresa">
-          <span class="service-icon">▦</span><h3>Empresas</h3><p>Telecomunicaciones y energía con una sola persona de contacto.</p><b>Revisar empresa →</b>
+        <button class="service-card" type="button" data-service="empresa">
+          <span class="service-icon" aria-hidden="true">▦</span><h3>Empresas</h3><p>Telecomunicaciones y energía con una sola persona de contacto.</p><b>Revisar empresa →</b>
         </button>
-        <button class="service-card quiet" data-service="ayuda">
-          <span class="service-icon">?</span><h3>No sé qué necesito</h3><p>Explícanos qué te preocupa y Alicia ordena el caso contigo.</p><b>Pedir asesoramiento →</b>
+        <button class="service-card quiet" type="button" data-service="ayuda">
+          <span class="service-icon" aria-hidden="true">?</span><h3>No sé qué necesito</h3><p>Explícanos qué te preocupa y Alicia ordena el caso contigo.</p><b>Pedir asesoramiento →</b>
         </button>
       </div>
     </div>
@@ -107,7 +117,7 @@
 
   <section class="section alicia-section">
     <div class="container alicia-story">
-      <div class="alicia-story-photo"><img src="/assets/alicia.webp?v=3" alt="Alicia, atención comercial FÍBARO" loading="lazy"></div>
+      <div class="alicia-story-photo"><img data-alicia-photo alt="Alicia, atención comercial FÍBARO" loading="lazy" decoding="async"></div>
       <div class="alicia-story-copy">
         <span class="kicker">Tu persona en FÍBARO</span>
         <h2>Alicia no es un chatbot. Es quien continúa tu caso.</h2>
@@ -117,7 +127,7 @@
           <div><b>02</b><span><strong>Seguimiento</strong>Tu servicio queda preparado para futuras revisiones.</span></div>
           <div><b>03</b><span><strong>Criterio comercial</strong>Una buena recomendación también puede ser “quédate como estás”.</span></div>
         </div>
-        <button class="btn btn-primary" data-open-funnel>Quiero que Alicia revise mi caso</button>
+        <button class="btn btn-primary" type="button" data-open-funnel>Quiero que Alicia revise mi caso</button>
       </div>
     </div>
   </section>
@@ -129,7 +139,7 @@
         <h2>Más cerca cuando la instalación necesita más control.</h2>
         <p>En Sanlúcar de Barrameda, Rota, Chipiona, El Puerto de Santa María y Jerez tenemos una ventaja adicional: para muchas instalaciones podemos coordinar con nuestro propio equipo técnico.</p>
         <div class="city-list"><span>Sanlúcar</span><span>Rota</span><span>Chipiona</span><span>El Puerto</span><span>Jerez</span></div>
-        <button class="btn btn-white" data-open-funnel>Comprobar mi caso</button>
+        <button class="btn btn-white" type="button" data-open-funnel>Comprobar mi caso</button>
       </div>
       <div class="zone-proof">
         <div><span>Venta</span><b>→</b><span>Coordinación</span><b>→</b><span>Instalación</span><b>→</b><span>Seguimiento</span></div>
@@ -140,12 +150,12 @@
 
   <section class="section reassurance">
     <div class="container reassurance-grid">
-      <div class="section-head stacked"><span class="kicker">Sin letras pequeñas de confianza</span><h2>Lo que sí puedes esperar de FÍBARO.</h2></div>
+      <div class="section-head stacked"><span class="kicker">Compromisos claros</span><h2>Lo que sí puedes esperar de FÍBARO.</h2></div>
       <div class="check-grid">
         <div>✓ <span><strong>No cambiamos nada sin tu autorización.</strong> Primero te explicamos la propuesta.</span></div>
         <div>✓ <span><strong>No necesitas entender la factura.</strong> Si hace falta, la revisamos nosotros.</span></div>
         <div>✓ <span><strong>No mostramos un catálogo infinito.</strong> Filtramos antes de proponerte opciones.</span></div>
-        <div>✓ <span><strong>Tus datos no se publican.</strong> La documentación se almacena de forma privada.</span></div>
+        <div>✓ <span><strong>Tus documentos no se publican.</strong> La documentación se almacena de forma privada.</span></div>
       </div>
     </div>
   </section>
@@ -166,34 +176,37 @@
   <section class="final-cta">
     <div class="container final-grid">
       <div><span class="kicker light">Una revisión, una persona</span><h2>Cuéntanos tu caso. Alicia continúa desde ahí.</h2><p>Unas pocas preguntas para evitar que empieces de cero cuando hablemos.</p></div>
-      <div class="final-actions"><button class="btn btn-white btn-lg" data-open-funnel>Quiero que Alicia lo revise</button><a class="btn btn-outline-white btn-lg js-wa-direct" href="#">WhatsApp directo</a></div>
+      <div class="final-actions"><button class="btn btn-white btn-lg" type="button" data-open-funnel>Quiero que Alicia lo revise</button><a class="btn btn-outline-white btn-lg js-wa-direct" href="#">WhatsApp directo</a></div>
     </div>
   </section>
 </main>
 
 <footer class="footer">
   <div class="container footer-grid">
-    <div class="footer-brand"><img src="/assets/logo-fibaro-white.webp" alt="FÍBARO Telecomunicaciones"><p>Asesoramiento comercial en telecomunicaciones y energía. FÍBARO no es un operador de red.</p></div>
-    <div><strong>Contacto</strong><a href="tel:+34633671657" class="js-call">633 671 657</a><a class="js-wa-direct">WhatsApp</a><span>C/ Infanta Beatriz 13<br>11540 Sanlúcar de Barrameda</span></div>
+    <div class="footer-brand"><span class="footer-logo-box"><img data-fibaro-logo alt="FÍBARO Telecomunicaciones"></span><p>Asesoramiento comercial en telecomunicaciones y energía. FÍBARO no es un operador de red.</p></div>
+    <div><strong>Contacto</strong><a href="tel:+34633671657" class="js-call">633 671 657</a><a class="js-wa-direct" href="#">WhatsApp</a><span>C/ Infanta Beatriz 13<br>11540 Sanlúcar de Barrameda</span></div>
     <div><strong>Servicios</strong><a href="/telecom">Fibra y móvil</a><a href="/energia">Luz</a><a href="/empresas">Empresas</a><a href="/zona-fibaro">Zona FÍBARO</a></div>
-    <div><strong>Información</strong><a href="/privacidad">Privacidad</a><a href="/aviso-legal">Aviso legal</a><a href="https://fibaro-panel-v1.vercel.app/login">Área cliente</a></div>
+    <div><strong>Información</strong><a href="/privacidad">Privacidad</a><a href="/aviso-legal">Aviso legal</a><a href="/area-cliente">Área cliente</a><a class="js-instagram" href="#">Instagram</a><a class="js-tiktok" href="#">TikTok</a></div>
   </div>
   <div class="container footer-bottom"><span>© 2026 FÍBARO Telecomunicaciones · MEJIAS BUSINESS S.L. · B75334714</span><span>Precios y condiciones sujetos a vigencia y disponibilidad del proveedor.</span></div>
 </footer>
 
-<div class="mobile-bar"><a class="mobile-wa js-wa-direct">WhatsApp</a><button class="mobile-main" data-open-funnel>Que Alicia lo revise</button></div>
+<div class="mobile-bar"><a class="mobile-wa js-wa-direct" href="#">WhatsApp</a><button class="mobile-main" type="button" data-open-funnel>Que Alicia lo revise</button></div>
 
 <div class="modal" id="funnel-modal" aria-hidden="true">
   <div class="modal-backdrop" data-close-funnel></div>
   <section class="funnel" role="dialog" aria-modal="true" aria-labelledby="funnel-title">
-    <div class="funnel-top"><div class="funnel-logo"><img src="/assets/logo-fibaro.webp" alt="FÍBARO"><small id="step-label">Paso 1</small></div><button class="modal-close" data-close-funnel aria-label="Cerrar">×</button></div>
+    <div class="funnel-top"><div class="funnel-logo"><img data-fibaro-logo alt="FÍBARO"><small id="step-label">Paso 1</small></div><button class="modal-close" type="button" data-close-funnel aria-label="Cerrar">×</button></div>
     <div class="progress"><span id="progress-bar"></span></div>
     <div id="funnel-stage" class="funnel-stage"></div>
     <div class="funnel-foot"><span>Sin compromiso</span><span>·</span><span>Sin cambios sin tu autorización</span></div>
   </section>
 </div>
 
-<script src="/config.js?v=3"></script>
-<script src="/assets/app.js?v=3" defer></script>
+<script src="/config.js?v=4"></script>
+<script src="/assets/alicia-data-1.js?v=4"></script>
+<script src="/assets/logo-data.js?v=4"></script>
+<script src="/assets/brand-init.js?v=4"></script>
+<script src="/assets/app.js?v=4" defer></script>
 </body>
 </html>
