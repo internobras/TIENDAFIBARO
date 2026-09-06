@@ -35,8 +35,13 @@ jobs:
             await page.waitForFunction(()=>{
               const p=document.querySelector('[data-alicia-photo]');
               const l=document.querySelector('[data-fibaro-logo]');
-              return p && l && p.src.startsWith('data:image/webp;base64,') && l.src.startsWith('data:image/webp;base64,') && p.naturalWidth>100 && l.naturalWidth>100;
+              return p && l && p.src.includes('/assets/alicia.webp') && l.src.includes('/assets/logo-fibaro.webp') && p.complete && l.complete && p.naturalWidth>100 && l.naturalWidth>100;
             },null,{timeout:10000});
+            const imageState=await page.evaluate(()=>({
+              photo:{src:document.querySelector('[data-alicia-photo]')?.src,w:document.querySelector('[data-alicia-photo]')?.naturalWidth,h:document.querySelector('[data-alicia-photo]')?.naturalHeight},
+              logo:{src:document.querySelector('[data-fibaro-logo]')?.src,w:document.querySelector('[data-fibaro-logo]')?.naturalWidth,h:document.querySelector('[data-fibaro-logo]')?.naturalHeight}
+            }));
+            console.log('IMAGE_STATE',JSON.stringify(imageState));
             const title=(await page.locator('#route-title').innerText()).trim();
             if(!title.includes('Tus servicios')) throw new Error(`Unexpected home title: ${title}`);
             await page.screenshot({path:'desktop-home.png',fullPage:true});
@@ -80,14 +85,14 @@ jobs:
             await mobile.close();
 
             if(errors.length) throw new Error(`Browser errors:\n${errors.join('\n')}`);
-            console.log(JSON.stringify({ok:true,reference,title}));
+            console.log(JSON.stringify({ok:true,reference,title,imageState}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: fibaro-production-browser-e2e
+          name: fibaro-production-browser-e2e-v3
           path: |
             desktop-home.png
             desktop-success.png
