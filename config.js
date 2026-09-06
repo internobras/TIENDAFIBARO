@@ -4,7 +4,8 @@ window.FIBARO_CONFIG = {
   instagram: 'fibaroteleco',
   tiktok: 'fiabroteleco',
   domain: 'fibaroteleco.com',
-  supabaseUrl: '',
-  supabasePublishableKey: '',
-  leadCaptureEnabled: false
+  intakeEndpoint: 'https://kgcuqxzpxykqszdeonte.supabase.co/functions/v1/submit-intake',
+  panelUrl: 'https://fibaro-panel-v1.vercel.app',
+  leadCaptureEnabled: true,
+  privacyVersion: '2026-09-06-growth-v1'
 };
