@@ -1,0 +1,30 @@
+name: Validate FIBARO Web
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate JavaScript syntax
+        run: node --check assets/app.js
+      - name: Ensure removed Gas offer is not public
+        run: |
+          if grep -RniE '\bGas\b|Luz y gas|luz/gas' index.html config.js assets/app.js assets/styles.css privacidad.html aviso-legal.html; then
+            echo 'Gas references found in customer-facing files'
+            exit 1
+          fi
+      - name: Validate connected conversion funnel
+        run: |
+          grep -q 'intakeEndpoint' config.js
+          grep -q 'leadCaptureEnabled: true' config.js
+          grep -q 'submitLead' assets/app.js
+          grep -q 'alicia-photo' index.html
+          grep -q 'data-open-funnel' index.html
+          grep -q 'rewrites' vercel.json
