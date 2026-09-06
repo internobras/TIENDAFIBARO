@@ -5,10 +5,10 @@
     {"source":"/area-cliente","destination":"https://fibaro-panel-v1.vercel.app/login","permanent":false}
   ],
   "rewrites": [
-    {"source":"/telecom","destination":"/index.html"},
-    {"source":"/energia","destination":"/index.html"},
-    {"source":"/empresas","destination":"/index.html"},
-    {"source":"/zona-fibaro","destination":"/index.html"}
+    {"source":"/telecom","destination":"/"},
+    {"source":"/energia","destination":"/"},
+    {"source":"/empresas","destination":"/"},
+    {"source":"/zona-fibaro","destination":"/"}
   ],
   "headers": [
     {"source":"/(.*)","headers":[
