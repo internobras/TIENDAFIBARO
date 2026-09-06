@@ -1,112 +1,59 @@
-(() => {
-  'use strict';
-  const C = window.FIBARO_CONFIG || {};
-  const wa = (message) => `https://wa.me/${C.whatsappNumber || '34633671657'}?text=${encodeURIComponent(message)}`;
-  const $ = (s, p=document) => p.querySelector(s);
-  const $$ = (s, p=document) => [...p.querySelectorAll(s)];
-  const safe = (v='') => String(v).trim().replace(/[\n\r]+/g,' ');
-  const path = location.pathname.replace(/^\/+|\/+$/g,'') || 'home';
-  document.body.classList.add(`route-${path.replaceAll('/','-')}`);
+(()=>{
+'use strict';
+const C=window.FIBARO_CONFIG||{},$=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
+const safe=(v='')=>String(v).trim().replace(/[\n\r]+/g,' '),path=location.pathname.replace(/^\/+|\/+$/g,'')||'home';
+const qs=new URLSearchParams(location.search);
+function store(k,v){try{localStorage.setItem(k,v)}catch{}}function read(k){try{return localStorage.getItem(k)}catch{return null}}
+const anonymousId=read('fibaro_anon')||crypto.randomUUID();store('fibaro_anon',anonymousId);
+const referral=safe(qs.get('ref')||'');
+const current={source:safe(qs.get('utm_source')||qs.get('src')||(referral?'referral':'')||'directo'),medium:safe(qs.get('utm_medium')||''),campaign:safe(qs.get('utm_campaign')||''),content:safe(qs.get('utm_content')||''),landing:location.pathname,referrer:safe(document.referrer||'')};
+if(!read('fibaro_first_touch'))store('fibaro_first_touch',JSON.stringify({...current,at:new Date().toISOString()}));
+let first=current;try{first=JSON.parse(read('fibaro_first_touch')||'null')||current}catch{}
 
-  const routeCopy = {
-    telecom:{eyebrow:'Fibra · Móvil · TV',title:'¿Estás pagando de más por tu fibra y móvil?',subtitle:'Cuéntanos qué tienes y qué quieres mejorar. Filtramos las opciones y Alicia continúa contigo sin marearte con decenas de tarifas.',primary:'Revisar mi telecom'},
-    energia:{eyebrow:'Luz · Gas · Factura',title:'Tu factura de energía puede tener margen de mejora.',subtitle:'No necesitas entender potencias, peajes ni servicios adicionales. Nos dices qué quieres revisar y, si hace falta, Alicia mira tu factura contigo.',primary:'Revisar luz o gas'},
-    empresas:{eyebrow:'Autónomos · Empresas',title:'Menos tiempo comparando. Más control sobre los gastos de tu negocio.',subtitle:'Telecomunicaciones y energía en un único punto de contacto. Tratamos tu caso como una cuenta de empresa, no como una tarifa residencial.',primary:'Revisar mi empresa'},
-    'zona-fibaro':{eyebrow:'Sanlúcar · Rota · Chipiona · El Puerto · Jerez',title:'Aquí no solo vendemos. También podemos coordinar con equipo técnico propio.',subtitle:'En nuestra zona tenemos una ventaja difícil de copiar: más control sobre la instalación y el seguimiento de los servicios que gestionamos.',primary:'Comprobar mi caso'}
-  };
-  if(routeCopy[path]){
-    $('#route-eyebrow').textContent = routeCopy[path].eyebrow;
-    $('#route-title').textContent = routeCopy[path].title;
-    $('#route-subtitle').textContent = routeCopy[path].subtitle;
-    $('#route-primary').textContent = routeCopy[path].primary;
-    document.title = `${routeCopy[path].title} | FÍBARO Telecom`;
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.href = `https://${C.domain || 'fibaroteleco.com'}/${path}`;
-    const description = document.querySelector('meta[name="description"]');
-    if (description) description.content = routeCopy[path].subtitle;
-  }
+function fdBase(){const fd=new FormData();fd.set('anonymous_id',anonymousId);fd.set('utm_source',current.source);fd.set('utm_medium',current.medium);fd.set('utm_campaign',current.campaign);fd.set('utm_content',current.content);fd.set('landing_path',current.landing);fd.set('referrer',current.referrer);if(referral)fd.set('referral_code',referral);return fd}
+async function track(eventName,payload={},reference=''){if(!C.leadCaptureEnabled||!C.intakeEndpoint)return;try{const fd=fdBase();fd.set('mode','event');fd.set('event_name',eventName);fd.set('payload',JSON.stringify(payload));if(reference)fd.set('reference',reference);await fetch(C.intakeEndpoint,{method:'POST',body:fd,keepalive:true})}catch{}}
+track('page_view',{path,first_source:first.source});if(referral)track('referral_clicked',{referral_code:referral});
 
-  const qs = new URLSearchParams(location.search);
-  const attribution = {
-    source: safe(qs.get('utm_source') || qs.get('src') || document.referrer || 'directo'),
-    medium: safe(qs.get('utm_medium') || ''),
-    campaign: safe(qs.get('utm_campaign') || ''),
-    content: safe(qs.get('utm_content') || ''),
-    landing: location.pathname
-  };
-  try { localStorage.setItem('fibaro_first_touch', localStorage.getItem('fibaro_first_touch') || JSON.stringify({...attribution,at:new Date().toISOString()})); } catch {}
+const routeCopy={
+ home:{eyebrow:'Fibra · Móvil · Luz · Empresas',title:'Deja de perder tiempo buscando tarifas.',subtitle:'Cuéntanos qué quieres mejorar. Alicia revisa las opciones y te dice cuáles tienen sentido para ti. Si lo que ya tienes está bien, también te lo decimos.',primary:'Quiero que reviséis mi caso'},
+ telecom:{eyebrow:'Fibra · Móvil · TV',title:'No necesitas comparar veinte tarifas para mejorar tu telecom.',subtitle:'Dinos qué tienes, qué te molesta y cuánto pagas aproximadamente. Reducimos las opciones antes de hablar contigo.',primary:'Revisar mi telecom'},
+ energia:{eyebrow:'Luz · Revisión de factura',title:'Una factura de luz puede decirnos más que veinte preguntas.',subtitle:'No necesitas entender potencias ni peajes. Alicia revisa tu situación y te dice si merece la pena estudiar un cambio.',primary:'Revisar mi luz'},
+ empresas:{eyebrow:'Autónomos · Empresas',title:'Menos tiempo comparando. Más control sobre los gastos de tu negocio.',subtitle:'Telecomunicaciones y energía con un único punto de contacto. Tu caso se trata como una cuenta de empresa.',primary:'Revisar mi empresa'},
+ 'zona-fibaro':{eyebrow:'Sanlúcar · Rota · Chipiona · El Puerto · Jerez',title:'Aquí no solo vendemos. También podemos coordinar con equipo técnico propio.',subtitle:'En nuestra zona tenemos más control sobre muchas de las instalaciones que gestionamos y sobre su seguimiento.',primary:'Comprobar mi caso'}
+};
+const rc=routeCopy[path]||routeCopy.home;$('#route-eyebrow')&&( $('#route-eyebrow').textContent=rc.eyebrow);$('#route-title')&&( $('#route-title').textContent=rc.title);$('#route-subtitle')&&( $('#route-subtitle').textContent=rc.subtitle);$('#route-primary')&&( $('#route-primary').textContent=rc.primary);if(path!=='home'){document.title=`${rc.title} | FÍBARO`;const canonical=$('link[rel="canonical"]');if(canonical)canonical.href=`https://${C.domain||'fibaroteleco.com'}/${path}`;const meta=$('meta[name="description"]');if(meta)meta.content=rc.subtitle}
+const img=$('#alicia-photo');const photo=window.__FIBARO_ASSETS?.alicia?.[0];if(img&&photo)img.src=`data:image/webp;base64,${photo}`;
 
-  const genericMessage = `Hola, vengo de ${C.domain || 'fibaroteleco.com'} y quiero que reviséis mis tarifas.`;
-  $$('.js-wa-direct').forEach(a => { a.href = wa(genericMessage); a.target='_blank'; a.rel='noopener'; });
-  $$('.js-wa-bill').forEach(a => { a.href = wa('Hola, quiero que reviséis mi factura de luz/gas. La adjunto en esta conversación.'); a.target='_blank'; a.rel='noopener'; });
-  addEventListener('scroll', () => $('#nav')?.classList.toggle('scrolled', scrollY > 14), {passive:true});
+const wa=(message)=>`https://wa.me/${C.whatsappNumber||'34633671657'}?text=${encodeURIComponent(message)}`;
+$$('.js-wa-direct').forEach(a=>{a.href=wa(`Hola Alicia, vengo de ${C.domain||'fibaroteleco.com'} y quiero que reviséis mi caso.`);a.target='_blank';a.rel='noopener';a.onclick=()=>track('whatsapp_clicked',{kind:'direct',path})});
+$$('.js-call').forEach(a=>a.onclick=()=>track('call_clicked',{path}));
+$$('.js-instagram').forEach(a=>a.href=`https://instagram.com/${C.instagram||'fibaroteleco'}`);$$('.js-tiktok').forEach(a=>a.href=`https://www.tiktok.com/@${C.tiktok||'fiabroteleco'}`);
 
-  const modal = $('#funnel-modal'), stage = $('#funnel-stage'), bar = $('#progress-bar'), label=$('#step-label');
-  let state = {}, step = 0;
-  const zones = ['11540','11550','11520','11500','11401','11402','11403','11404','11405','11406','11407','11408','11409'];
-  const serviceLabels = {telecom:'Fibra y móvil',luz:'Luz',gas:'Gas',empresa:'Mi negocio',ayuda:'Quiero asesoramiento'};
-  const steps = [serviceStep, detailStep, objectiveStep, spendStep, postcodeStep, resultStep];
-
-  function openFunnel(service){
-    state = { service: service || (path==='telecom'?'telecom':path==='energia'?'luz':path==='empresas'?'empresa':null) };
-    step = state.service ? 1 : 0;
-    modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; render();
-    try { window.dataLayer?.push({event:'selector_started',source:attribution.source,landing:location.pathname}); } catch {}
-  }
-  function closeFunnel(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-  $$('[data-open-funnel]').forEach(b=>b.addEventListener('click',()=>openFunnel()));
-  $$('[data-service]').forEach(b=>b.addEventListener('click',()=>openFunnel(b.dataset.service)));
-  $$('[data-close-funnel]').forEach(b=>b.addEventListener('click',closeFunnel));
-  addEventListener('keydown',e=>{if(e.key==='Escape')closeFunnel()});
-
-  function shell(kicker,title,description,body){return `<div class="funnel-question"><span class="tiny">${kicker}</span><h2 id="funnel-title">${title}</h2>${description?`<p>${description}</p>`:''}${body}</div>`}
-  function buttons(items,key){return `<div class="choice-grid">${items.map(([v,t,s])=>`<button class="choice ${state[key]===v?'selected':''}" data-choice="${v}" data-key="${key}">${t}${s?`<small>${s}</small>`:''}</button>`).join('')}</div>`}
-  function bindChoices(next=true){ $$('[data-choice]',stage).forEach(b=>b.onclick=()=>{state[b.dataset.key]=b.dataset.choice;if(next){step++;render()}else render()}) }
-  function navButtons({nextText='Continuar',can=true,back=true}={}){return `<div class="funnel-actions">${back?'<button class="btn funnel-back" data-back>← Atrás</button>':''}<button class="btn btn-primary funnel-next" data-next ${can?'':'disabled'}>${nextText}</button></div>`}
-  function bindNav(validate){ const back=$('[data-back]',stage), next=$('[data-next]',stage); if(back) back.onclick=()=>{step=Math.max(0,step-1);render()}; if(next) next.onclick=()=>{if(!validate||validate()){step++;render()}} }
-  function serviceStep(){
-    stage.innerHTML=shell('Empezamos','¿Qué quieres revisar?','Elige solo una opción. Luego podemos ver el resto.',buttons([
-      ['telecom','Fibra y móvil','Internet, líneas, TV o segunda residencia'],['luz','Luz','Revisar suministro o factura'],['gas','Gas','Revisar suministro o factura'],['empresa','Mi negocio','Telecom y/o energía'],['ayuda','No lo sé','Prefiero que me asesoren']],'service'));
-    bindChoices();
-  }
-  function detailStep(){
-    let items,title='¿Qué necesitas exactamente?',desc='';
-    if(state.service==='telecom') items=[['fibra_movil','Fibra + móvil','La opción más habitual'],['fibra','Solo fibra','Internet en casa'],['movil','Solo móvil','Una o varias líneas'],['fibra_movil_tv','Fibra + móvil + TV','También quieres contenidos'],['segunda','Segunda residencia','Internet en otra vivienda'],['no_se','No lo sé','Que Alicia me oriente']];
-    else if(state.service==='empresa') {title='¿Qué quieres revisar en tu negocio?';items=[['telecom','Telecom','Fibra, líneas y servicios'],['energia','Energía','Luz y/o gas'],['todo','Todo','Telecom + energía'],['no_se','No lo sé','Quiero una revisión general']];}
-    else { title=`¿Qué quieres revisar de ${state.service==='luz'?'la luz':'el gas'}?`; items=[['pagar_menos','Quiero pagar menos','Revisar coste actual'],['cambio','Quiero cambiar','Buscar alternativa'],['factura','Quiero revisar una factura','La enviaré por WhatsApp'],['no_se','No lo sé','Que Alicia me oriente']]; }
-    stage.innerHTML=shell('Tu situación',title,desc,buttons(items,'detail'));bindChoices();
-  }
-  function objectiveStep(){
-    let items;
-    if(state.service==='telecom') items=[['pagar_menos','Pagar menos'],['mejor_internet','Mejorar internet'],['mas_datos','Tener más datos'],['lineas','Añadir líneas'],['cambiar','Cambiar de compañía'],['asesoramiento','Quiero asesoramiento']];
-    else if(state.service==='empresa') items=[['ahorro','Reducir gasto'],['mejorar','Mejorar servicio'],['centralizar','Centralizar telecom y energía'],['nueva_alta','Nueva alta / ampliación'],['asesoramiento','Revisión general']];
-    else items=[['ahorro','Pagar menos'],['servicios','Revisar servicios añadidos'],['autoconsumo','Tengo autoconsumo/solar'],['cambio','Quiero cambiar'],['asesoramiento','Quiero asesoramiento']];
-    stage.innerHTML=shell('Objetivo','¿Qué te gustaría conseguir?','Esto nos ayuda a entender qué significa “mejor” para ti.',buttons(items,'objective'));bindChoices();
-  }
-  function spendStep(){
-    const items=state.service==='empresa'?[['lt50','Menos de 50 €'],['50_100','50–100 €'],['100_250','100–250 €'],['250_500','250–500 €'],['gt500','Más de 500 €'],['no_se','No lo sé']]:[['lt30','Menos de 30 €'],['30_50','30–50 €'],['50_70','50–70 €'],['70_100','70–100 €'],['gt100','Más de 100 €'],['no_se','No lo sé']];
-    stage.innerHTML=shell('Una referencia','¿Cuánto pagas aproximadamente al mes?','No hace falta que sea exacto.',buttons(items,'spend'));bindChoices();
-  }
-  function postcodeStep(){
-    stage.innerHTML=shell('Último dato','¿Dónde necesitas el servicio?','Con el código postal podemos identificar si estás además en nuestra zona técnica.',`<div class="field"><label for="cp">Código postal</label><input id="cp" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Ej. 11540" value="${state.postcode||''}"></div><div id="zone-msg"></div>${navButtons({can:/^\d{5}$/.test(state.postcode||'')})}`);
-    const input=$('#cp',stage), msg=$('#zone-msg',stage), next=$('[data-next]',stage);
-    const update=()=>{state.postcode=input.value.replace(/\D/g,'').slice(0,5);input.value=state.postcode;const local=zones.includes(state.postcode);state.technicalZone=local;msg.innerHTML=local?'<div class="zone-good"><b>Estás en zona FÍBARO.</b><br>En esta zona contamos además con equipo técnico propio para las instalaciones que gestionamos.</div>':'';next.disabled=!/^\d{5}$/.test(state.postcode)};
-    input.oninput=update; update(); bindNav(()=>/^\d{5}$/.test(state.postcode)); setTimeout(()=>input.focus(),80);
-  }
-  function resultStep(){
-    const firstTouch=(()=>{try{return JSON.parse(localStorage.getItem('fibaro_first_touch')||'null')}catch{return null}})();
-    const ref=`FD-${Date.now().toString(36).toUpperCase().slice(-6)}`;state.ref=ref;
-    stage.innerHTML=shell('Ya tenemos contexto','Ahora Alicia puede continuar contigo.','No necesitas rellenar más datos aquí. Al pulsar WhatsApp se abrirá un mensaje con este resumen para que no tengas que volver a explicarlo.',`<dl class="result-box"><dt>Referencia</dt><dd>${ref}</dd><dt>Servicio</dt><dd>${serviceLabels[state.service]||state.service}</dd><dt>Objetivo</dt><dd>${human(state.objective)}</dd><dt>Gasto aproximado</dt><dd>${human(state.spend)}</dd><dt>Código postal</dt><dd>${state.postcode}${state.technicalZone?' · Zona FÍBARO':''}</dd></dl><div class="result-actions"><a class="btn wa-button btn-lg" id="result-wa" target="_blank" rel="noopener">Continuar por WhatsApp →</a><a class="btn call-button" href="tel:+34633671657">Llamar al 633 671 657</a></div><p class="privacy-note">No realizamos ningún cambio sin tu autorización. En esta versión inmediata, si envías una factura la adjuntas directamente en WhatsApp; no la almacenamos en esta web.</p>`);
-    const message=[`Hola, soy un cliente de ${C.domain||'fibaroteleco.com'}.`,`Referencia: ${ref}`,`Quiero revisar: ${serviceLabels[state.service]||state.service}`,`Necesidad: ${human(state.detail)}`,`Objetivo: ${human(state.objective)}`,`Pago aprox.: ${human(state.spend)}`,`CP: ${state.postcode}${state.technicalZone?' (zona FÍBARO)':''}`,`Origen: ${prettySource(firstTouch?.source||attribution.source)}`].join('\n');
-    $('#result-wa',stage).href=wa(message);
-    $('#result-wa',stage).onclick=()=>{try{window.dataLayer?.push({event:'whatsapp_clicked',lead_ref:ref,service:state.service,source:attribution.source})}catch{};persistAnonymousLead({...state,attribution,ref,stage:'whatsapp'})};
-    persistAnonymousLead({...state,attribution,ref,stage:'completed'});
-  }
-  function human(v){return ({pagar_menos:'Pagar menos',mejor_internet:'Mejor internet',mas_datos:'Más datos',lineas:'Añadir líneas',cambiar:'Cambiar de compañía',asesoramiento:'Asesoramiento',ahorro:'Pagar menos',mejorar:'Mejorar servicio',centralizar:'Centralizar servicios',nueva_alta:'Nueva alta / ampliación',servicios:'Revisar servicios añadidos',autoconsumo:'Autoconsumo / solar',lt30:'Menos de 30 €','30_50':'30–50 €','50_70':'50–70 €','70_100':'70–100 €',gt100:'Más de 100 €',lt50:'Menos de 50 €','50_100':'50–100 €','100_250':'100–250 €','250_500':'250–500 €',gt500:'Más de 500 €',no_se:'No lo sé',fibra_movil:'Fibra + móvil',fibra:'Solo fibra',movil:'Solo móvil',fibra_movil_tv:'Fibra + móvil + TV',segunda:'Segunda residencia',telecom:'Telecom',energia:'Energía',todo:'Telecom + energía',factura:'Revisar factura',cambio:'Cambiar'})[v]||v||'—'}
-  function prettySource(v){ if(!v||v==='directo')return 'Directo'; if(v.includes('instagram'))return 'Instagram'; if(v.includes('tiktok'))return 'TikTok'; if(v.includes('google'))return 'Google'; return v.slice(0,45) }
-  async function persistAnonymousLead(payload){
-    if(!C.leadCaptureEnabled || !C.supabaseUrl || !C.supabasePublishableKey) return;
-    try { await fetch(`${C.supabaseUrl}/rest/v1/direct_leads`,{method:'POST',headers:{'apikey':C.supabasePublishableKey,'Authorization':`Bearer ${C.supabasePublishableKey}`,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({reference:payload.ref,service:payload.service,detail:payload.detail||null,objective:payload.objective||null,spend_band:payload.spend||null,postal_code:payload.postcode||null,technical_zone:!!payload.technicalZone,source:payload.attribution?.source||null,medium:payload.attribution?.medium||null,campaign:payload.attribution?.campaign||null,content:payload.attribution?.content||null,landing:payload.attribution?.landing||location.pathname,status:payload.stage==='whatsapp'?'whatsapp':'new'})}); } catch(e){ console.warn('Lead capture unavailable',e); }
-  }
-  function render(){bar.style.width=`${Math.min(100,((step+1)/steps.length)*100)}%`;label.textContent=`Paso ${Math.min(step+1,steps.length)} de ${steps.length}`;(steps[step]||resultStep)();}
+const modal=$('#funnel-modal'),stage=$('#funnel-stage'),bar=$('#progress-bar'),label=$('#step-label');let state={},step=0;
+const zones=['11540','11550','11520','11500','11401','11402','11403','11404','11405','11406','11407','11408','11409'];
+const serviceLabels={telecom:'Fibra y móvil',luz:'Luz',empresa:'Mi negocio',ayuda:'Asesoramiento'};
+const steps=[serviceStep,detailStep,objectiveStep,spendStep,postcodeStep,valueStep,contactStep];
+function initialService(){return path==='telecom'?'telecom':path==='energia'?'luz':path==='empresas'?'empresa':null}
+function openFunnel(service){state={service:service||initialService()};step=state.service?1:0;modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';track('funnel_started',{service:state.service||null,path});render()}
+function closeFunnel(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+$$('[data-open-funnel]').forEach(b=>b.addEventListener('click',()=>openFunnel()));$$('[data-service]').forEach(b=>b.addEventListener('click',()=>openFunnel(b.dataset.service)));$$('[data-close-funnel]').forEach(b=>b.addEventListener('click',closeFunnel));addEventListener('keydown',e=>{if(e.key==='Escape')closeFunnel()});
+function render(){bar.style.width=`${Math.round(((step+1)/steps.length)*100)}%`;label.textContent=`Paso ${Math.min(step+1,steps.length)} de ${steps.length}`;steps[step]();track('funnel_step',{step,service:state.service||null})}
+function shell(kicker,title,description,body){stage.innerHTML=`<div class="funnel-question"><span class="tiny">${kicker}</span><h2 id="funnel-title">${title}</h2>${description?`<p>${description}</p>`:''}${body}</div>`}
+function buttons(items,key){return `<div class="choice-grid">${items.map(([v,t,s])=>`<button type="button" class="choice ${state[key]===v?'selected':''}" data-choice="${v}" data-key="${key}">${t}${s?`<small>${s}</small>`:''}</button>`).join('')}</div>`}
+function bindChoices(){ $$('[data-choice]',stage).forEach(b=>b.onclick=()=>{state[b.dataset.key]=b.dataset.choice;step++;render()}) }
+function navButtons(nextText='Continuar'){return `<div class="funnel-actions"><button type="button" class="btn funnel-back" data-back>← Atrás</button><button type="button" class="btn btn-primary funnel-next" data-next>${nextText}</button></div>`}
+function bindNav(validate){const back=$('[data-back]',stage),next=$('[data-next]',stage);if(back)back.onclick=()=>{step=Math.max(0,step-1);render()};if(next)next.onclick=()=>{if(!validate||validate()){step++;render()}}}
+function serviceStep(){shell('Empezamos','¿Qué quieres resolver?','No necesitas saber qué tarifa quieres. Elige el problema.',buttons([['telecom','Fibra y móvil','Internet, líneas, TV o segunda residencia'],['luz','Luz','Revisar suministro o factura'],['empresa','Mi negocio','Telecom y/o energía'],['ayuda','Quiero asesoramiento','Prefiero que Alicia me oriente']],'service'));bindChoices()}
+function detailStep(){let items,title='¿Qué necesitas exactamente?';if(state.service==='telecom')items=[['fibra_movil','Fibra + móvil','La opción más habitual'],['fibra','Solo fibra','Internet en casa'],['movil','Solo móvil','Una o varias líneas'],['fibra_movil_tv','Fibra + móvil + TV','También quieres contenidos'],['segunda','Segunda residencia','Internet en otra vivienda'],['no_se','No lo sé','Que Alicia me oriente']];else if(state.service==='empresa'){title='¿Qué quieres revisar en tu negocio?';items=[['telecom','Telecom','Fibra, líneas y servicios'],['energia','Energía','Suministro eléctrico'],['todo','Todo','Telecom + energía'],['no_se','No lo sé','Revisión general']]}else if(state.service==='luz')items=[['pagar_menos','Quiero pagar menos','Revisar coste actual'],['cambio','Quiero cambiar','Buscar una alternativa'],['factura','Quiero revisar una factura','La puedo adjuntar o enviar después'],['no_se','No lo sé','Que Alicia me oriente']];else items=[['telecom','Telecom'],['energia','Luz'],['todo','Revisión general'],['no_se','No lo sé']];shell('Tu situación',title,'Una sola respuesta es suficiente.',buttons(items,'detail'));bindChoices()}
+function objectiveStep(){let items;if(state.service==='telecom')items=[['pagar_menos','Pagar menos'],['mejor_internet','Mejorar internet'],['mas_datos','Tener más datos'],['lineas','Añadir líneas'],['cambiar','Cambiar de compañía'],['asesoramiento','Quiero asesoramiento']];else if(state.service==='empresa')items=[['ahorro','Reducir gasto'],['mejorar','Mejorar servicio'],['centralizar','Centralizar servicios'],['nueva_alta','Nueva alta / ampliación'],['asesoramiento','Revisión general']];else items=[['ahorro','Pagar menos'],['servicios','Revisar servicios añadidos'],['autoconsumo','Tengo autoconsumo / solar'],['cambio','Quiero cambiar'],['asesoramiento','Quiero asesoramiento']];shell('Objetivo','¿Qué te gustaría conseguir?','Esto nos dice qué significa “mejor” para ti.',buttons(items,'objective'));bindChoices()}
+function spendStep(){const items=state.service==='empresa'?[['lt50','Menos de 50 €'],['50_100','50–100 €'],['100_250','100–250 €'],['250_500','250–500 €'],['gt500','Más de 500 €'],['no_se','No lo sé']]:[['lt30','Menos de 30 €'],['30_50','30–50 €'],['50_70','50–70 €'],['70_100','70–100 €'],['gt100','Más de 100 €'],['no_se','No lo sé']];shell('Una referencia','¿Cuánto pagas aproximadamente al mes?','No hace falta que sea exacto.',buttons(items,'spend'));bindChoices()}
+function postcodeStep(){shell('Ubicación','¿Dónde necesitas el servicio?','El código postal nos permite detectar además si estás en nuestra zona técnica.',`<div class="field"><label for="cp">Código postal</label><input id="cp" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Ej. 11540" value="${state.postcode||''}"></div><div id="zone-msg"></div>${navButtons()}`);const input=$('#cp',stage),msg=$('#zone-msg',stage),next=$('[data-next]',stage);const update=()=>{state.postcode=input.value.replace(/\D/g,'').slice(0,5);input.value=state.postcode;state.technicalZone=zones.includes(state.postcode);msg.innerHTML=state.technicalZone?'<div class="zone-good"><b>Estás en Zona FÍBARO.</b><br>En esta zona contamos además con equipo técnico propio para muchas de las instalaciones que gestionamos.</div>':'';next.disabled=!/^\d{5}$/.test(state.postcode)};input.oninput=update;update();bindNav(()=>/^\d{5}$/.test(state.postcode));setTimeout(()=>input.focus(),80)}
+function valueStep(){track('funnel_completed',{service:state.service,detail:state.detail,objective:state.objective,spend:state.spend,postal_code:state.postcode,technical_zone:!!state.technicalZone});shell('Ya tenemos contexto','Tu caso merece una revisión personalizada.','Alicia ya no necesita empezar preguntándote desde cero. El siguiente paso es identificarte para que pueda continuar contigo.',`<div class="value-card"><strong>${valueHeadline()}</strong><p>${valueText()}</p></div><div class="result-box"><div><span>Servicio</span><b>${serviceLabels[state.service]||state.service}</b></div><div><span>Objetivo</span><b>${human(state.objective)}</b></div><div><span>Gasto aprox.</span><b>${human(state.spend)}</b></div><div><span>Código postal</span><b>${state.postcode}${state.technicalZone?' · Zona FÍBARO':''}</b></div></div>${navButtons('Que Alicia lo revise')}`);bindNav(()=>true)}
+function valueHeadline(){if(state.technicalZone)return 'Además estás en nuestra zona técnica.';if(state.objective==='pagar_menos'||state.objective==='ahorro')return 'Tiene sentido comprobar si hay margen de ahorro.';return 'Hay información suficiente para filtrar opciones antes de hablar contigo.'}
+function valueText(){if(state.technicalZone)return 'Podemos revisar la parte comercial y, cuando el servicio lo permite, coordinar además con nuestro propio equipo técnico.';return 'No te enseñaremos decenas de tarifas. Revisamos el caso y te explicamos solo las opciones que encajen con lo que has pedido.'}
+function normalizedService(){if(state.service==='luz')return'energy';if(state.service==='telecom')return'fiber';if(state.service==='empresa'){if(state.detail==='energia')return'energy';if(state.detail==='telecom')return'fiber';return'callback'}return'callback'}
+function contactStep(){const energy=normalizedService()==='energy';shell('Último paso','¿Cómo puede Alicia continuar contigo?','Primero guardamos tu solicitud. Después, si quieres, seguimos por WhatsApp sin que tengas que repetir la información.',`<form id="lead-form"><div class="field"><label>Nombre</label><input name="nombre" autocomplete="name" maxlength="120" required placeholder="Tu nombre"></div><div class="field"><label>Teléfono</label><input name="telefono" autocomplete="tel" inputmode="tel" maxlength="20" required placeholder="600 000 000"></div><div class="field"><label>Email <small>(opcional)</small></label><input name="email" type="email" autocomplete="email" maxlength="160" placeholder="tu@email.com"></div>${energy?'<div class="field"><label>Factura <small>(opcional)</small></label><input name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp"><small>Si no la tienes ahora, puedes enviarla después por WhatsApp.</small></div>':''}<div class="hp" aria-hidden="true"><input name="website" autocomplete="off" tabindex="-1"></div><label class="consent"><input name="consentbox" type="checkbox" required> <span>He leído la <a href="/privacidad" target="_blank">política de privacidad</a> y autorizo a FÍBARO a usar estos datos para atender y hacer seguimiento de esta solicitud.</span></label><div class="funnel-actions"><button type="button" class="btn funnel-back" data-back>← Atrás</button><button class="btn btn-primary" id="send-lead">Enviar a Alicia</button></div><p class="privacy-note">No realizamos ningún cambio de compañía sin tu autorización.</p></form>`);$('[data-back]',stage).onclick=()=>{step--;render()};$('#lead-form',stage).onsubmit=submitLead}
+async function submitLead(e){e.preventDefault();const form=e.currentTarget,btn=$('#send-lead',stage);btn.disabled=true;btn.textContent='Enviando…';try{const fd=fdBase();const data=new FormData(form);fd.set('nombre',safe(data.get('nombre')));fd.set('telefono',safe(data.get('telefono')));fd.set('email',safe(data.get('email')));fd.set('servicio',normalizedService());fd.set('intent','web_funnel');fd.set('consent','yes');fd.set('website',safe(data.get('website')));fd.set('postal_code',state.postcode||'');fd.set('technical_zone',state.technicalZone?'yes':'no');fd.set('funnel_detail',state.detail||'');fd.set('funnel_objective',state.objective||'');fd.set('spend_band',state.spend||'');fd.set('contact_preference','whatsapp');fd.set('funnel_context',JSON.stringify({service:state.service,detail:state.detail,objective:state.objective,spend:state.spend,postal_code:state.postcode,technical_zone:!!state.technicalZone,first_touch:first}));const file=data.get('file');if(file instanceof File&&file.size)fd.set('file',file);const res=await fetch(C.intakeEndpoint,{method:'POST',body:fd});const out=await res.json();if(!res.ok||!out.ok)throw new Error(out.error||'No se ha podido enviar.');state.reference=out.reference;state.name=safe(data.get('nombre'));state.phone=safe(data.get('telefono'));successStep(out)}catch(err){btn.disabled=false;btn.textContent='Enviar a Alicia';let box=$('.form-error',stage);if(!box){box=document.createElement('div');box.className='zone-good form-error';form.prepend(box)}box.textContent=err?.message||'No se ha podido enviar. Inténtalo de nuevo.'}}
+function successStep(out){bar.style.width='100%';label.textContent='Solicitud enviada';const msg=[`Hola Alicia, acabo de hacer la revisión en ${C.domain||'fibaroteleco.com'}.`,`Referencia: ${out.reference}`,`Quiero revisar: ${serviceLabels[state.service]||state.service}`,`Necesidad: ${human(state.detail)}`,`Objetivo: ${human(state.objective)}`,`Pago aprox.: ${human(state.spend)}`,`CP: ${state.postcode}${state.technicalZone?' (Zona FÍBARO)':''}`].join('\n');stage.innerHTML=`<div class="success-card"><div class="success-mark">✓</div><span class="tiny">YA ESTÁ EN FÍBARO</span><h2>Alicia ya tiene tu solicitud.</h2><p>No necesitas volver a explicar lo mismo. Tu referencia es:</p><div class="ref">${out.reference}</div><a id="success-wa" class="btn btn-primary btn-lg full" target="_blank" rel="noopener" href="${wa(msg)}">Continuar por WhatsApp →</a><p class="privacy-note">Si prefieres esperar, también está bien: la solicitud ya ha quedado registrada para que Alicia pueda verla.</p></div>`;$('#success-wa',stage).onclick=()=>track('whatsapp_clicked',{kind:'after_lead',service:state.service},out.reference)}
+function human(v){return({pagar_menos:'Pagar menos',mejor_internet:'Mejorar internet',mas_datos:'Más datos',lineas:'Añadir líneas',cambiar:'Cambiar de compañía',asesoramiento:'Asesoramiento',ahorro:'Pagar menos',mejorar:'Mejorar servicio',centralizar:'Centralizar servicios',nueva_alta:'Nueva alta / ampliación',servicios:'Revisar servicios añadidos',autoconsumo:'Autoconsumo / solar',lt30:'Menos de 30 €','30_50':'30–50 €','50_70':'50–70 €','70_100':'70–100 €',gt100:'Más de 100 €',lt50:'Menos de 50 €','50_100':'50–100 €','100_250':'100–250 €','250_500':'250–500 €',gt500:'Más de 500 €',no_se:'No lo sé',fibra_movil:'Fibra + móvil',fibra:'Solo fibra',movil:'Solo móvil',fibra_movil_tv:'Fibra + móvil + TV',segunda:'Segunda residencia',telecom:'Telecom',energia:'Energía',todo:'Telecom + energía',factura:'Revisar factura',cambio:'Cambiar'})[v]||v||'—'}
 })();
