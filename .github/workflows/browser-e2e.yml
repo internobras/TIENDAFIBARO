@@ -1,0 +1,96 @@
+name: Production Browser E2E
+
+on:
+  push:
+    branches: [chatgpt/public-browser-e2e]
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 --no-save
+          npx playwright install --with-deps chromium
+      - name: Test production customer journey
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const base = 'https://www.fibaroteleco.com';
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const context = await browser.newContext({viewport:{width:1440,height:1000}});
+            const page = await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(`pageerror: ${e.message}`));
+            page.on('console',m=>{if(m.type()==='error') errors.push(`console: ${m.text()}`)});
+            await page.goto(`${base}/?utm_source=e2e_browser&utm_medium=github&utm_campaign=public_v2_browser`,{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>{
+              const p=document.querySelector('[data-alicia-photo]');
+              const l=document.querySelector('[data-fibaro-logo]');
+              return p && l && p.src.startsWith('data:image/webp;base64,') && l.src.startsWith('data:image/webp;base64,') && p.naturalWidth>100 && l.naturalWidth>100;
+            },null,{timeout:10000});
+            const title=(await page.locator('#route-title').innerText()).trim();
+            if(!title.includes('Tus servicios')) throw new Error(`Unexpected home title: ${title}`);
+            await page.screenshot({path:'desktop-home.png',fullPage:true});
+
+            for(const route of ['telecom','energia','empresas','zona-fibaro']){
+              const r=await context.request.get(`${base}/${route}`);
+              if(r.status()!==200) throw new Error(`${route} returned ${r.status()}`);
+            }
+            for(const route of ['privacidad','aviso-legal']){
+              const r=await context.request.get(`${base}/${route}`);
+              if(r.status()!==200) throw new Error(`${route} returned ${r.status()}`);
+            }
+
+            await page.locator('#route-primary').click();
+            await page.locator('[data-choice="telecom"]').click();
+            await page.locator('[data-choice="fibra_movil"]').click();
+            await page.locator('[data-choice="pagar_menos"]').click();
+            await page.locator('[data-choice="50_70"]').click();
+            await page.locator('#cp').fill('11540');
+            await page.locator('[data-next]').click();
+            await page.locator('[data-next]').click();
+            await page.locator('input[name="nombre"]').fill('E2E FIBARO BROWSER');
+            await page.locator('input[name="telefono"]').fill('699999902');
+            await page.locator('input[name="email"]').fill('e2e-browser@fibaroteleco.test');
+            await page.locator('input[name="consentbox"]').check();
+            await page.locator('#send-lead').click();
+            await page.locator('.success-card').waitFor({state:'visible',timeout:25000});
+            const success=(await page.locator('.success-card').innerText()).trim();
+            if(!success.includes('Alicia ya tiene tu solicitud')) throw new Error(`Missing success confirmation: ${success}`);
+            const reference=(await page.locator('.ref').innerText()).trim();
+            if(!/^FB-/.test(reference)) throw new Error(`Invalid reference ${reference}`);
+            fs.writeFileSync('reference.txt',reference+'\n');
+            await page.screenshot({path:'desktop-success.png',fullPage:true});
+
+            const mobile=await browser.newPage({viewport:{width:390,height:844}});
+            await mobile.goto(`${base}/`,{waitUntil:'domcontentloaded'});
+            await mobile.waitForFunction(()=>document.querySelector('[data-alicia-photo]')?.naturalWidth>100,null,{timeout:10000});
+            const bar=mobile.locator('.mobile-bar');
+            if(!(await bar.isVisible())) throw new Error('Mobile action bar is not visible');
+            await mobile.screenshot({path:'mobile-home.png',fullPage:true});
+            await mobile.close();
+
+            if(errors.length) throw new Error(`Browser errors:\n${errors.join('\n')}`);
+            console.log(JSON.stringify({ok:true,reference,title}));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fibaro-production-browser-e2e
+          path: |
+            desktop-home.png
+            desktop-success.png
+            mobile-home.png
+            reference.txt
+          if-no-files-found: ignore
