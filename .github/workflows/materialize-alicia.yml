@@ -23,7 +23,9 @@ jobs:
           for line in m.group(1).splitlines():
               line=line.strip().rstrip(',')
               if line: vals.append(ast.literal_eval(line))
-          Path('assets/alicia.webp').write_bytes(base64.b64decode(''.join(vals)))
+          data=''.join(vals)
+          data += '=' * ((4 - len(data) % 4) % 4)
+          Path('assets/alicia.webp').write_bytes(base64.b64decode(data))
           html=Path('index.html').read_text()
           html=html.replace('<img id="alicia-photo" class="alicia-photo" alt="Alicia, responsable comercial de FÍBARO">','<img id="alicia-photo" class="alicia-photo" src="https://raw.githubusercontent.com/internobras/TIENDAFIBARO/main/assets/alicia.webp" alt="Alicia, responsable comercial de FÍBARO">')
           html=html.replace('<script src="/assets/alicia-data-1.js"></script>','')
